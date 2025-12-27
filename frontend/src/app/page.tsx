@@ -7,6 +7,7 @@ import { AIAssistantPanel } from '@/components/AIAssistantPanel';
 import { AIDetectorPanel } from '@/components/AIDetectorPanel';
 import { BrainstormPanel } from '@/components/BrainstormPanel';
 import { ExportModal } from '@/components/ExportModal';
+import { ToastContainer } from '@/components/ToastContainer';
 import { usePaperStore } from '@/lib/store';
 
 export default function Home() {
@@ -25,6 +26,7 @@ export default function Home() {
       </div>
 
       <ExportModal />
+      <ToastContainer />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { X, Download, Loader2 } from 'lucide-react';
 import { usePaperStore } from '@/lib/store';
 import { exportAPI } from '@/lib/api';
+import { useToastStore } from '@/lib/toast';
 
 export function ExportModal() {
   const {
@@ -16,6 +17,7 @@ export function ExportModal() {
     sections,
     selectedTemplate,
   } = usePaperStore();
+  const { addToast } = useToastStore();
   const [loading, setLoading] = useState(false);
   const [aiDisclosure, setAiDisclosure] = useState('');
   const [includeDisclosure, setIncludeDisclosure] = useState(false);
@@ -24,7 +26,7 @@ export function ExportModal() {
 
   const handleExport = async () => {
     if (!title.trim()) {
-      alert('Please add a title to your paper');
+      addToast('Please add a title to your paper', 'warning');
       return;
     }
 
@@ -52,11 +54,11 @@ export function ExportModal() {
       link.remove();
       window.URL.revokeObjectURL(url);
       
-      alert('Paper exported successfully!');
+      addToast('Paper exported successfully!', 'success');
       toggleExport();
     } catch (error) {
       console.error('Error exporting paper:', error);
-      alert('Failed to export paper. Please try again.');
+      addToast('Failed to export paper. Please try again.', 'error');
     } finally {
       setLoading(false);
     }
