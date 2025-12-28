@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, Save, Bot, Shield, Lightbulb, Upload, Moon, Sun } from 'lucide-react';
+import { Download, Save, Bot, Shield, Lightbulb, Upload, Moon, Sun, BookOpen, TrendingUp, Keyboard } from 'lucide-react';
 import { usePaperStore } from '@/lib/store';
 import { cn, formatDate } from '@/lib/utils';
 import { ModelSettings } from './ModelSettings';
@@ -11,6 +11,9 @@ export function Header() {
     showAIDetector,
     showBrainstorm,
     showFileUpload,
+    showSuggestions,
+    showCitations,
+    showAnalytics,
     darkMode,
     lastSaved,
     isSaving,
@@ -20,6 +23,10 @@ export function Header() {
     toggleExport,
     toggleFileUpload,
     toggleDarkMode,
+    toggleSuggestions,
+    toggleCitations,
+    toggleAnalytics,
+    toggleKeyboardShortcuts,
   } = usePaperStore();
 
   return (
@@ -143,6 +150,73 @@ export function Header() {
           >
             <Shield className="h-4 w-4" />
             <span className="text-sm font-medium">AI Detector</span>
+          </button>
+
+          <div className={cn(
+            "w-px h-8 mx-2",
+            darkMode ? "bg-gray-700" : "bg-white/30"
+          )} />
+
+          {/* New Panel Toggles */}
+          <button
+            onClick={toggleSuggestions}
+            className={cn(
+              'flex items-center space-x-2 px-4 py-2 rounded-lg backdrop-blur-md transition-all shadow-md',
+              showSuggestions
+                ? 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500 text-yellow-700'
+                : darkMode
+                ? 'bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700'
+                : 'bg-white/60 border border-white/40 text-secondary-700 hover:bg-white/80'
+            )}
+            title="Smart Suggestions"
+          >
+            <Lightbulb className="h-4 w-4" />
+            <span className="text-sm font-medium">Tips</span>
+          </button>
+
+          <button
+            onClick={toggleCitations}
+            className={cn(
+              'flex items-center space-x-2 px-4 py-2 rounded-lg backdrop-blur-md transition-all shadow-md',
+              showCitations
+                ? 'bg-gradient-to-r from-primary-500/20 to-purple-500/20 border border-primary-500 text-primary-700'
+                : darkMode
+                ? 'bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700'
+                : 'bg-white/60 border border-white/40 text-secondary-700 hover:bg-white/80'
+            )}
+            title="Citations & References"
+          >
+            <BookOpen className="h-4 w-4" />
+            <span className="text-sm font-medium">References</span>
+          </button>
+
+          <button
+            onClick={toggleAnalytics}
+            className={cn(
+              'flex items-center space-x-2 px-4 py-2 rounded-lg backdrop-blur-md transition-all shadow-md',
+              showAnalytics
+                ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500 text-green-700'
+                : darkMode
+                ? 'bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700'
+                : 'bg-white/60 border border-white/40 text-secondary-700 hover:bg-white/80'
+            )}
+            title="Writing Analytics"
+          >
+            <TrendingUp className="h-4 w-4" />
+            <span className="text-sm font-medium">Analytics</span>
+          </button>
+
+          <button
+            onClick={toggleKeyboardShortcuts}
+            className={cn(
+              'p-2 rounded-lg backdrop-blur-md transition-all shadow-md',
+              darkMode
+                ? 'bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700'
+                : 'bg-white/60 border border-white/40 text-secondary-700 hover:bg-white/80'
+            )}
+            title="Keyboard Shortcuts"
+          >
+            <Keyboard className="h-4 w-4" />
           </button>
 
           <div className={cn(

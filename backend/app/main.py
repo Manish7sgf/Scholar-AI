@@ -35,6 +35,7 @@ from app.services.llm_service import llm_service
 from app.services.file_analysis_service import file_analysis_service
 from app.services.humanization_service import humanization_service
 from app.services.pdf_export_service import pdf_export_service
+from app.services.citation_service import router as citation_router
 
 
 # Create FastAPI app
@@ -317,6 +318,10 @@ async def get_model_settings():
         return settings
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# Include citation routes
+app.include_router(citation_router, prefix="/api", tags=["citations"])
 
 
 if __name__ == "__main__":
