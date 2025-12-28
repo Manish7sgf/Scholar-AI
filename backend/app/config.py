@@ -6,7 +6,12 @@ from typing import List
 class Settings(BaseSettings):
     """Application settings"""
     
-    # OpenAI Configuration
+    # OpenRouter Configuration (replaces OpenAI)
+    openrouter_api_key: str = ""
+    default_model: str = "mistralai/mistral-7b-instruct:free"
+    smart_model_switching: bool = True
+    
+    # Legacy OpenAI support (for backward compatibility)
     openai_api_key: str = ""
     openai_model: str = "gpt-4-turbo-preview"
     

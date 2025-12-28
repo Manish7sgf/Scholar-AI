@@ -3,12 +3,11 @@
 import { useState } from 'react';
 import { X, Upload, FileText, Loader2, Sparkles, Download } from 'lucide-react';
 import { usePaperStore } from '@/lib/store';
-import { fileAPI } from '@/lib/api';
-import { useToastStore } from '@/lib/toast';
+import { fileUploadAPI, humanizationAPI, exportAPI } from '@/lib/api';
+import { showToast } from '@/lib/toast';
 
 export function FileUploadPanel() {
-  const { showFileUpload, toggleFileUpload, setFileAnalysis, fileAnalysis } = usePaperStore();
-  const { addToast } = useToastStore();
+  const { showFileUpload, toggleFileUpload, setFileAnalysis, fileAnalysis, darkMode } = usePaperStore();
   const [loading, setLoading] = useState(false);
   const [humanizing, setHumanizing] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -28,7 +27,7 @@ export function FileUploadPanel() {
     ];
 
     if (!validTypes.includes(file.type) && !file.name.match(/\.(docx|pdf|txt)$/i)) {
-      addToast('Please upload a .docx, .pdf, or .txt file', 'error');
+      showToast({ message: 'Please upload a .docx, .pdf, or .txt file', type: 'error' });
       return;
     }
 
@@ -36,47 +35,48 @@ export function FileUploadPanel() {
     setLoading(true);
 
     try {
-      const response = await fileAPI.analyze(file);
+      const response = await fileUploadAPI.analyze(file);
       setFileAnalysis(response.data);
-      addToast('File analyzed successfully!', 'success');
+      showToast({ message: 'File analyzed successfully!', type: 'success' });
     } catch (error) {
       console.error('Error analyzing file:', error);
-      addToast('Failed to analyze file. Please try again.', 'error');
+      showToast({ message: 'Failed to analyze file. Please try again.', type: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
   const handleHumanize = async () => {
-    if (!fileAnalysis) return;
+    if (!fileAnalysis || !uploadedFile) return;
 
     setHumanizing(true);
     try {
-      // For now, we'll humanize the entire detected text
-      // In a real app, you'd extract the full text from the analysis
-      const textToHumanize = fileAnalysis.structure_analysis.word_count > 0
-        ? "Sample text from your document..." // This would be the actual text
-        : "";
+      // Re-read the file for humanization since the backend doesn't store full text
+      const fileText = await uploadedFile.text();
       
-      const response = await fileAPI.humanize(textToHumanize, 'academic');
+      const response = await humanizationAPI.humanize(fileText, 'academic');
       setHumanizedText(response.data.humanized_text);
-      addToast(`Text humanized! ${response.data.changes_made.length} improvements made.`, 'success');
+      showToast({ message: `Text humanized! ${response.data.changes_made.length} improvements made.`, type: 'success' });
     } catch (error) {
       console.error('Error humanizing text:', error);
-      addToast('Failed to humanize text. Please check your API configuration.', 'error');
+      showToast({ message: 'Failed to humanize text. Please check your API configuration.', type: 'error' });
     } finally {
       setHumanizing(false);
     }
   };
 
   const handleExport = async () => {
-    if (!humanizedText && !fileAnalysis) return;
+    if (!humanizedText && !uploadedFile) return;
 
     try {
-      const content = humanizedText || "Original content";
+      const content = humanizedText || (uploadedFile ? await uploadedFile.text() : '');
       const title = uploadedFile?.name.replace(/\.[^/.]+$/, '') || 'Document';
       
-      const response = await fileAPI.exportFile(title, content, exportFormat);
+      const response = await exportAPI.file({
+        title,
+        content,
+        format: exportFormat
+      });
       
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -87,10 +87,10 @@ export function FileUploadPanel() {
       link.remove();
       window.URL.revokeObjectURL(url);
       
-      addToast(`File exported as ${exportFormat.toUpperCase()}!`, 'success');
+      showToast({ message: `File exported as ${exportFormat.toUpperCase()}!`, type: 'success' });
     } catch (error) {
       console.error('Error exporting file:', error);
-      addToast('Failed to export file. Please try again.', 'error');
+      showToast({ message: 'Failed to export file. Please try again.', type: 'error' });
     }
   };
 

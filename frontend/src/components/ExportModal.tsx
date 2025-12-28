@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { X, Download, Loader2 } from 'lucide-react';
 import { usePaperStore } from '@/lib/store';
 import { exportAPI } from '@/lib/api';
-import { useToastStore } from '@/lib/toast';
+import { showToast } from '@/lib/toast';
 
 export function ExportModal() {
   const {
@@ -16,8 +16,8 @@ export function ExportModal() {
     keywords,
     sections,
     selectedTemplate,
+    darkMode,
   } = usePaperStore();
-  const { addToast } = useToastStore();
   const [loading, setLoading] = useState(false);
   const [aiDisclosure, setAiDisclosure] = useState('');
   const [includeDisclosure, setIncludeDisclosure] = useState(false);
@@ -26,7 +26,7 @@ export function ExportModal() {
 
   const handleExport = async () => {
     if (!title.trim()) {
-      addToast('Please add a title to your paper', 'warning');
+      showToast({ message: 'Please add a title to your paper', type: 'warning' });
       return;
     }
 
@@ -42,7 +42,7 @@ export function ExportModal() {
         ai_disclosure: includeDisclosure ? aiDisclosure : undefined,
       };
 
-      const response = await exportAPI.toDocx(exportData);
+      const response = await exportAPI.docx(exportData);
       
       // Create download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -54,11 +54,11 @@ export function ExportModal() {
       link.remove();
       window.URL.revokeObjectURL(url);
       
-      addToast('Paper exported successfully!', 'success');
+      showToast({ message: 'Paper exported successfully!', type: 'success' });
       toggleExport();
     } catch (error) {
       console.error('Error exporting paper:', error);
-      addToast('Failed to export paper. Please try again.', 'error');
+      showToast({ message: 'Failed to export paper. Please try again.', type: 'error' });
     } finally {
       setLoading(false);
     }

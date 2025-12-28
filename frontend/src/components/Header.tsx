@@ -3,6 +3,7 @@
 import { Download, Save, Bot, Shield, Lightbulb, Upload, Moon, Sun } from 'lucide-react';
 import { usePaperStore } from '@/lib/store';
 import { cn, formatDate } from '@/lib/utils';
+import { ModelSettings } from './ModelSettings';
 
 export function Header() {
   const {
@@ -48,22 +49,27 @@ export function Header() {
           </div>
           
           {/* Last Saved Indicator */}
-          <div className={cn(
-            "text-xs px-3 py-1 rounded-full",
-            darkMode ? "bg-gray-800 text-gray-400" : "bg-white/60 text-secondary-600"
-          )}>
-            {isSaving ? (
-              <span className="flex items-center space-x-1">
-                <span className="inline-block h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
-                <span>Saving...</span>
-              </span>
-            ) : (
-              <span>Last saved: {formatDate(lastSaved)}</span>
-            )}
-          </div>
+          {lastSaved && (
+            <div className={cn(
+              "text-xs px-3 py-1 rounded-full",
+              darkMode ? "bg-gray-800 text-gray-400" : "bg-white/60 text-secondary-600"
+            )}>
+              {isSaving ? (
+                <span className="flex items-center space-x-1">
+                  <span className="inline-block h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
+                  <span>Saving...</span>
+                </span>
+              ) : (
+                <span>Last saved: {lastSaved}</span>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center space-x-2">
+          {/* Model Settings */}
+          <ModelSettings />
+          
           {/* Dark Mode Toggle */}
           <button
             onClick={toggleDarkMode}

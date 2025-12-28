@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { X, Shield, AlertTriangle, CheckCircle, FileText, Loader2 } from 'lucide-react';
 import { usePaperStore } from '@/lib/store';
-import { detectorAPI } from '@/lib/api';
+import { detectionAPI } from '@/lib/api';
 
 export function AIDetectorPanel() {
   const { showAIDetector, toggleAIDetector, sections, activeSection, detectionResult, setDetectionResult } =
@@ -26,7 +26,7 @@ export function AIDetectorPanel() {
 
     setLoading(true);
     try {
-      const response = await detectorAPI.detect(currentSection.content);
+      const response = await detectionAPI.detect(currentSection.content);
       setDetectionResult(response.data);
     } catch (error) {
       console.error('Error detecting AI content:', error);
@@ -45,7 +45,7 @@ export function AIDetectorPanel() {
     setLoading(true);
     try {
       const toolsList = aiTools.split(',').map((t) => t.trim());
-      const response = await detectorAPI.generateDisclosure(toolsList, purpose);
+      const response = await detectionAPI.generateDisclosure(toolsList);
       setDisclosureText(response.data.disclosure_statement);
       setShowDisclosureForm(false);
     } catch (error) {

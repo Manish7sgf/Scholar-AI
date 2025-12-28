@@ -301,6 +301,24 @@ async def export_file(request: FileExportRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/api/models/settings")
+async def get_model_settings():
+    """
+    Get current LLM model settings and available models
+    
+    Returns information about:
+    - Provider (OpenRouter or OpenAI)
+    - Default model
+    - Smart switching status
+    - Available models with icons and descriptions
+    """
+    try:
+        settings = llm_service.get_current_settings()
+        return settings
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

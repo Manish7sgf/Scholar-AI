@@ -22,7 +22,7 @@ export function Sidebar() {
     // Load template data when selected template changes
     const loadTemplate = async () => {
       try {
-        const response = await templateAPI.getOne(selectedTemplate);
+        const response = await templateAPI.getByFormat(selectedTemplate);
         setTemplateData(response.data);
       } catch (error) {
         console.error('Failed to load template:', error);
