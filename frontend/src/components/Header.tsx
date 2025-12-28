@@ -1,8 +1,8 @@
 'use client';
 
-import { Download, Save, Bot, Shield, Lightbulb, Upload } from 'lucide-react';
+import { Download, Save, Bot, Shield, Lightbulb, Upload, Moon, Sun } from 'lucide-react';
 import { usePaperStore } from '@/lib/store';
-import { cn } from '@/lib/utils';
+import { cn, formatDate } from '@/lib/utils';
 
 export function Header() {
   const {
@@ -10,15 +10,24 @@ export function Header() {
     showAIDetector,
     showBrainstorm,
     showFileUpload,
+    darkMode,
+    lastSaved,
+    isSaving,
     toggleAIAssistant,
     toggleAIDetector,
     toggleBrainstorm,
     toggleExport,
     toggleFileUpload,
+    toggleDarkMode,
   } = usePaperStore();
 
   return (
-    <header className="border-b border-white/20 backdrop-blur-xl bg-gradient-to-r from-white/90 to-primary-50/30 shadow-lg">
+    <header className={cn(
+      "border-b backdrop-blur-xl shadow-lg transition-colors",
+      darkMode
+        ? "border-gray-700 bg-gradient-to-r from-gray-900/90 to-gray-800/90"
+        : "border-white/20 bg-gradient-to-r from-white/90 to-primary-50/30"
+    )}>
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
@@ -26,15 +35,49 @@ export function Header() {
               <span className="text-white font-bold text-xl">S</span>
             </div>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">ScholarAI</h1>
-              <span className="text-xs text-secondary-500">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
+                ScholarAI
+              </h1>
+              <span className={cn(
+                "text-xs",
+                darkMode ? "text-gray-400" : "text-secondary-500"
+              )}>
                 Ethical AI-Powered Research Assistant
               </span>
             </div>
           </div>
+          
+          {/* Last Saved Indicator */}
+          <div className={cn(
+            "text-xs px-3 py-1 rounded-full",
+            darkMode ? "bg-gray-800 text-gray-400" : "bg-white/60 text-secondary-600"
+          )}>
+            {isSaving ? (
+              <span className="flex items-center space-x-1">
+                <span className="inline-block h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
+                <span>Saving...</span>
+              </span>
+            ) : (
+              <span>Last saved: {formatDate(lastSaved)}</span>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center space-x-2">
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={toggleDarkMode}
+            className={cn(
+              'p-2 rounded-lg backdrop-blur-md transition-all shadow-md',
+              darkMode
+                ? 'bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700'
+                : 'bg-white/60 border border-white/40 text-secondary-700 hover:bg-white/80'
+            )}
+            title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+
           {/* Panel Toggles */}
           <button
             onClick={toggleFileUpload}
@@ -42,6 +85,8 @@ export function Header() {
               'flex items-center space-x-2 px-4 py-2 rounded-lg backdrop-blur-md transition-all shadow-md',
               showFileUpload
                 ? 'bg-gradient-to-r from-primary-500/20 to-purple-500/20 border border-primary-500 text-primary-700'
+                : darkMode
+                ? 'bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700'
                 : 'bg-white/60 border border-white/40 text-secondary-700 hover:bg-white/80'
             )}
           >
@@ -55,6 +100,8 @@ export function Header() {
               'flex items-center space-x-2 px-4 py-2 rounded-lg backdrop-blur-md transition-all shadow-md',
               showBrainstorm
                 ? 'bg-gradient-to-r from-primary-500/20 to-purple-500/20 border border-primary-500 text-primary-700'
+                : darkMode
+                ? 'bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700'
                 : 'bg-white/60 border border-white/40 text-secondary-700 hover:bg-white/80'
             )}
           >
@@ -68,6 +115,8 @@ export function Header() {
               'flex items-center space-x-2 px-4 py-2 rounded-lg backdrop-blur-md transition-all shadow-md',
               showAIAssistant
                 ? 'bg-gradient-to-r from-primary-500/20 to-purple-500/20 border border-primary-500 text-primary-700'
+                : darkMode
+                ? 'bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700'
                 : 'bg-white/60 border border-white/40 text-secondary-700 hover:bg-white/80'
             )}
           >
@@ -81,6 +130,8 @@ export function Header() {
               'flex items-center space-x-2 px-4 py-2 rounded-lg backdrop-blur-md transition-all shadow-md',
               showAIDetector
                 ? 'bg-gradient-to-r from-primary-500/20 to-purple-500/20 border border-primary-500 text-primary-700'
+                : darkMode
+                ? 'bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700'
                 : 'bg-white/60 border border-white/40 text-secondary-700 hover:bg-white/80'
             )}
           >
@@ -88,11 +139,19 @@ export function Header() {
             <span className="text-sm font-medium">AI Detector</span>
           </button>
 
-          <div className="w-px h-8 bg-white/30 mx-2" />
+          <div className={cn(
+            "w-px h-8 mx-2",
+            darkMode ? "bg-gray-700" : "bg-white/30"
+          )} />
 
           {/* Action Buttons */}
           <button
-            className="flex items-center space-x-2 px-4 py-2 backdrop-blur-md bg-white/60 text-secondary-700 rounded-lg hover:bg-white/80 transition-all shadow-md border border-white/40"
+            className={cn(
+              "flex items-center space-x-2 px-4 py-2 backdrop-blur-md rounded-lg hover:opacity-90 transition-all shadow-md",
+              darkMode
+                ? "bg-gray-800 border border-gray-700 text-gray-300"
+                : "bg-white/60 border border-white/40 text-secondary-700"
+            )}
           >
             <Save className="h-4 w-4" />
             <span className="text-sm font-medium">Save</span>
