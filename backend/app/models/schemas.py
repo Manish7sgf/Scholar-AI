@@ -136,3 +136,40 @@ class HealthResponse(BaseModel):
     """Health check response"""
     status: str
     version: str
+
+
+class FileFormat(str, Enum):
+    """Supported file formats for export"""
+    docx = "docx"
+    pdf = "pdf"
+    txt = "txt"
+
+
+class FileAnalysisResult(BaseModel):
+    """Result of file analysis"""
+    word_count: int
+    detected_format: str
+    ai_detection: DetectionResult
+    structure_analysis: Dict[str, Any]
+    improvement_suggestions: List[str]
+
+
+class HumanizeRequest(BaseModel):
+    """Request to humanize text"""
+    text: str = Field(..., min_length=1)
+    style: Optional[str] = "academic"
+
+
+class HumanizeResponse(BaseModel):
+    """Humanized text response"""
+    humanized_text: str
+    changes_made: List[str]
+
+
+class FileExportRequest(BaseModel):
+    """Request to export analyzed/improved file"""
+    title: str
+    content: str
+    format: FileFormat
+    template_format: Optional[str] = "ieee"
+    include_improvements: bool = True

@@ -1,5 +1,5 @@
 """FastAPI main application for ScholarAI backend"""
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Response, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from typing import List
@@ -20,13 +20,21 @@ from app.models.schemas import (
     ChatRequest,
     ChatResponse,
     ExportRequest,
-    HealthResponse
+    HealthResponse,
+    FileAnalysisResult,
+    HumanizeRequest,
+    HumanizeResponse,
+    FileExportRequest,
+    FileFormat
 )
 from app.services.template_service import template_service
 from app.services.docx_service import docx_service
 from app.services.detector_service import detector_service
 from app.services.brainstorm_service import brainstorm_service
 from app.services.llm_service import llm_service
+from app.services.file_analysis_service import file_analysis_service
+from app.services.humanization_service import humanization_service
+from app.services.pdf_export_service import pdf_export_service
 
 
 # Create FastAPI app
@@ -184,6 +192,109 @@ async def export_to_docx(request: ExportRequest):
                 "Content-Disposition": f"attachment; filename=paper.docx"
             }
         )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/upload/analyze", response_model=FileAnalysisResult)
+async def analyze_uploaded_file(file: UploadFile = File(...)):
+    """
+    Analyze uploaded file for AI content, structure, and provide suggestions
+    
+    Supports: .docx, .pdf, .txt files
+    """
+    try:
+        # Read file content
+        content = await file.read()
+        
+        # Analyze file
+        result = file_analysis_service.analyze_file(content, file.filename)
+        
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/humanize", response_model=HumanizeResponse)
+async def humanize_text(request: HumanizeRequest):
+    """
+    Humanize text to make it sound more natural and less AI-generated
+    
+    This feature helps ensure academic integrity by making text sound authentic
+    """
+    try:
+        humanized_text, changes = await humanization_service.humanize_text(
+            request.text,
+            request.style or "academic"
+        )
+        return HumanizeResponse(
+            humanized_text=humanized_text,
+            changes_made=changes
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/export/file")
+async def export_file(request: FileExportRequest):
+    """Export content to specified format (DOCX, PDF, or TXT)"""
+    try:
+        if request.format == FileFormat.docx:
+            # Export as DOCX
+            doc_stream = docx_service.create_document(
+                title=request.title,
+                authors=[],
+                abstract="",
+                keywords=[],
+                sections=[{"name": "Content", "content": request.content}],
+                template_format=request.template_format or "ieee",
+                ai_disclosure=None
+            )
+            return StreamingResponse(
+                doc_stream,
+                media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                headers={
+                    "Content-Disposition": f"attachment; filename={request.title.replace(' ', '_')}.docx"
+                }
+            )
+        
+        elif request.format == FileFormat.pdf:
+            # Export as PDF
+            pdf_stream = pdf_export_service.create_pdf(
+                title=request.title,
+                content=request.content,
+                template_format=request.template_format or "ieee"
+            )
+            return StreamingResponse(
+                pdf_stream,
+                media_type="application/pdf",
+                headers={
+                    "Content-Disposition": f"attachment; filename={request.title.replace(' ', '_')}.pdf"
+                }
+            )
+        
+        elif request.format == FileFormat.txt:
+            # Export as plain text
+            text_content = f"{request.title}\n\n{request.content}"
+            from io import BytesIO
+            text_stream = BytesIO(text_content.encode('utf-8'))
+            return StreamingResponse(
+                text_stream,
+                media_type="text/plain",
+                headers={
+                    "Content-Disposition": f"attachment; filename={request.title.replace(' ', '_')}.txt"
+                }
+            )
+        
+        else:
+            raise HTTPException(status_code=400, detail="Invalid export format")
+    
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
